@@ -1,30 +1,47 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
 
-st.set_page_config(page_title="ระบบบัญชีโรงเรียน", layout="centered", page_icon="🏫")
+st.set_page_config(page_title="ระบบบัญชีโรงเรียน", layout="wide", page_icon="🏫")
 
-# --- แสดงภาพโลโก้โรงเรียนแบบ local ---
-school_img = Image.open("school.jpg")
-st.image(school_img, caption="SMART SCHOOL PROJECT", use_container_width=True)
-
-# --- CSS UI ---
+# ===== CSS สไตล์ Web App =====
 st.markdown("""
     <style>
-    .main {
-        background-color: #f0f4f8;
-        padding: 25px 40px 40px 40px;
-        border-radius: 15px;
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f3f6fa;
     }
-    .section-title {
-        font-size: 28px;
-        font-weight: 700;
-        color: #004466;
+    .title {
+        font-size: 36px;
+        font-weight: 800;
+        color: #2c3e50;
         margin-bottom: 10px;
+    }
+    .subtitle {
+        font-size: 20px;
+        color: #7f8c8d;
+        margin-bottom: 30px;
+    }
+    .stButton > button {
+        background-color: #3498db;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+    .stTextInput>div>div>input, .stNumberInput>div>div>input, .stTextArea textarea {
+        border-radius: 8px;
+    }
+    .block-container {
+        padding: 3rem 2rem;
     }
     </style>
 """, unsafe_allow_html=True)
 
+# ===== แสดงภาพโลโก้และชื่อแอป =====
+st.image("school.jpg", use_container_width=True)
+st.markdown('<div class="title">ระบบบัญชีโรงเรียน</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">จัดการรายรับ รายจ่าย และดูสรุปอย่างง่าย</div>', unsafe_allow_html=True)
+
+# ===== เตรียมข้อมูล session =====
 if 'income_data' not in st.session_state:
     st.session_state['income_data'] = pd.DataFrame(columns=["หมวดหมู่", "จำนวนเงิน"])
 if 'expense_data' not in st.session_state:
@@ -38,49 +55,49 @@ income_categories = [
     "ค่ากิจกรรมพัฒนาคุณภาพผู้เรียน"
 ]
 
-st.markdown('<div class="section-title">ระบบบัญชีโรงเรียน</div>', unsafe_allow_html=True)
+# ===== แบ่ง 2 คอลัมน์: รายรับ | รายจ่าย =====
+col1, col2 = st.columns(2)
 
-with st.form("income_form"):
-    st.markdown("💰 เพิ่มรายรับ")
-    category = st.selectbox("หมวดหมู่รายรับ", income_categories)
-    amount = st.number_input("จำนวนเงิน (บาท)", min_value=0.0, format="%.2f")
-    submitted_income = st.form_submit_button("เพิ่มรายรับ")
-    if submitted_income:
-        if amount > 0:
-            new_row = {"หมวดหมู่": category, "จำนวนเงิน": amount}
-            st.session_state.income_data = pd.concat([st.session_state.income_data, pd.DataFrame([new_row])], ignore_index=True)
-            st.success(f"เพิ่มรายรับ '{category}' จำนวน {amount:.2f} บาทเรียบร้อยแล้ว")
-        else:
-            st.error("กรุณาใส่จำนวนเงินมากกว่า 0")
+with col1:
+    st.subheader("💰 เพิ่มรายรับ")
+    with st.form("income_form"):
+        category = st.selectbox("หมวดหมู่รายรับ", income_categories)
+        amount = st.number_input("จำนวนเงิน (บาท)", min_value=0.0, format="%.2f")
+        if st.form_submit_button("เพิ่มรายรับ"):
+            if amount > 0:
+                new_row = {"หมวดหมู่": category, "จำนวนเงิน": amount}
+                st.session_state.income_data = pd.concat([st.session_state.income_data, pd.DataFrame([new_row])], ignore_index=True)
+                st.success(f"เพิ่มรายรับ '{category}' จำนวน {amount:.2f} บาทเรียบร้อยแล้ว")
+            else:
+                st.error("กรุณาใส่จำนวนเงินมากกว่า 0")
 
+with col2:
+    st.subheader("💸 เพิ่มรายจ่าย")
+    with st.form("expense_form"):
+        desc = st.text_input("รายละเอียดรายจ่าย")
+        expense_amount = st.number_input("จำนวนเงิน (บาท)", min_value=0.0, format="%.2f", key="expense_amount")
+        if st.form_submit_button("เพิ่มรายจ่าย"):
+            if desc.strip() and expense_amount > 0:
+                new_row = {"รายละเอียด": desc, "จำนวนเงิน": expense_amount}
+                st.session_state.expense_data = pd.concat([st.session_state.expense_data, pd.DataFrame([new_row])], ignore_index=True)
+                st.success(f"เพิ่มรายจ่าย '{desc}' จำนวน {expense_amount:.2f} บาทเรียบร้อยแล้ว")
+            else:
+                st.error("กรุณากรอกรายละเอียดและจำนวนเงินให้ถูกต้อง")
+
+# ===== สรุปผลบัญชี =====
 st.markdown("---")
-
-with st.form("expense_form"):
-    st.markdown("💸 เพิ่มรายจ่าย")
-    desc = st.text_area("รายละเอียดรายจ่าย")
-    expense_amount = st.number_input("จำนวนเงิน (บาท)", min_value=0.0, format="%.2f", key="expense_amount")
-    submitted_expense = st.form_submit_button("เพิ่มรายจ่าย")
-    if submitted_expense:
-        if desc.strip() and expense_amount > 0:
-            new_row = {"รายละเอียด": desc, "จำนวนเงิน": expense_amount}
-            st.session_state.expense_data = pd.concat([st.session_state.expense_data, pd.DataFrame([new_row])], ignore_index=True)
-            st.success(f"เพิ่มรายจ่าย '{desc}' จำนวน {expense_amount:.2f} บาทเรียบร้อยแล้ว")
-        else:
-            st.error("กรุณากรอกรายละเอียดและจำนวนเงินให้ถูกต้อง")
-
-st.markdown("---")
+st.subheader("📊 สรุปบัญชี")
 
 total_income = st.session_state.income_data["จำนวนเงิน"].sum()
 total_expense = st.session_state.expense_data["จำนวนเงิน"].sum()
 balance = total_income - total_expense
 
-st.markdown("📊 สรุปบัญชี")
-st.write(f"- รวมรายรับ: **{total_income:,.2f} บาท**")
-st.write(f"- รวมรายจ่าย: **{total_expense:,.2f} บาท**")
-st.write(f"- ยอดคงเหลือ: **{balance:,.2f} บาท**")
+st.metric("รวมรายรับ", f"{total_income:,.2f} บาท")
+st.metric("รวมรายจ่าย", f"{total_expense:,.2f} บาท")
+st.metric("ยอดคงเหลือ", f"{balance:,.2f} บาท")
 
-with st.expander("ดูข้อมูลรายรับทั้งหมด"):
+with st.expander("📄 ข้อมูลรายรับทั้งหมด"):
     st.dataframe(st.session_state.income_data)
 
-with st.expander("ดูข้อมูลรายจ่ายทั้งหมด"):
+with st.expander("📄 ข้อมูลรายจ่ายทั้งหมด"):
     st.dataframe(st.session_state.expense_data)
