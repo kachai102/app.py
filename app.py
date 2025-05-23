@@ -1,21 +1,13 @@
 import streamlit as st
 import pandas as pd
-from PIL import Image
 import requests
-from io import BytesIO
 
 st.set_page_config(page_title="ระบบบัญชีโรงเรียน", layout="centered",
                    page_icon="🏫")
 
-# --- โหลดรูปภาพโรงเรียนจาก URL (ตัวอย่าง) ---
+# --- ใช้ URL โดยตรงกับ st.image() ---
 school_img_url = "https://images.unsplash.com/photo-1596495577886-d920f1d9a8cc?auto=format&fit=crop&w=800&q=60"
-response = requests.get(school_img_url)
-school_img = Image.open(BytesIO(response.content))
-
-# --- ไอคอนเล็ก ๆ สำหรับแสดง infographic ---
-icon_income = "💰"
-icon_expense = "💸"
-icon_summary = "📊"
+st.image(school_img_url, caption="โรงเรียนของเรา", use_column_width=True)
 
 # --- CSS ปรับแต่ง UI ---
 st.markdown("""
@@ -30,19 +22,6 @@ st.markdown("""
         font-weight: 700;
         color: #004466;
         margin-bottom: 10px;
-    }
-    .info-icon {
-        font-size: 24px;
-        margin-right: 10px;
-        vertical-align: middle;
-    }
-    .btn-primary {
-        background-color: #1d72b8;
-        color: white;
-        font-weight: 600;
-        border-radius: 10px;
-        padding: 10px 20px;
-        margin-top: 15px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -61,18 +40,14 @@ income_categories = [
     "ค่ากิจกรรมพัฒนาคุณภาพผู้เรียน"
 ]
 
-# --- แสดงรูปภาพโรงเรียน ---
-st.image(school_img, caption="โรงเรียนของเรา", use_column_width=True)
-
-# --- หัวข้อหลัก ---
 st.markdown('<div class="section-title">ระบบบัญชีโรงเรียน</div>', unsafe_allow_html=True)
 
 # --- ฟอร์มเพิ่มรายรับ ---
 with st.form("income_form"):
-    st.markdown(f'<span class="info-icon">{icon_income}</span><b>เพิ่มรายรับ</b>', unsafe_allow_html=True)
+    st.markdown("💰 เพิ่มรายรับ")
     category = st.selectbox("หมวดหมู่รายรับ", income_categories)
     amount = st.number_input("จำนวนเงิน (บาท)", min_value=0.0, format="%.2f")
-    submitted_income = st.form_submit_button("เพิ่มรายรับ", help="เพิ่มข้อมูลรายรับ")
+    submitted_income = st.form_submit_button("เพิ่มรายรับ")
     if submitted_income:
         if amount > 0:
             new_row = {"หมวดหมู่": category, "จำนวนเงิน": amount}
@@ -85,10 +60,10 @@ st.markdown("---")
 
 # --- ฟอร์มเพิ่มรายจ่าย ---
 with st.form("expense_form"):
-    st.markdown(f'<span class="info-icon">{icon_expense}</span><b>เพิ่มรายจ่าย</b>', unsafe_allow_html=True)
+    st.markdown("💸 เพิ่มรายจ่าย")
     desc = st.text_area("รายละเอียดรายจ่าย")
     expense_amount = st.number_input("จำนวนเงิน (บาท)", min_value=0.0, format="%.2f", key="expense_amount")
-    submitted_expense = st.form_submit_button("เพิ่มรายจ่าย", help="เพิ่มข้อมูลรายจ่าย")
+    submitted_expense = st.form_submit_button("เพิ่มรายจ่าย")
     if submitted_expense:
         if desc.strip() and expense_amount > 0:
             new_row = {"รายละเอียด": desc, "จำนวนเงิน": expense_amount}
@@ -104,7 +79,7 @@ total_income = st.session_state.income_data["จำนวนเงิน"].sum()
 total_expense = st.session_state.expense_data["จำนวนเงิน"].sum()
 balance = total_income - total_expense
 
-st.markdown(f'<span class="info-icon">{icon_summary}</span><b>สรุปบัญชี</b>', unsafe_allow_html=True)
+st.markdown("📊 สรุปบัญชี")
 st.write(f"- รวมรายรับ: **{total_income:,.2f} บาท**")
 st.write(f"- รวมรายจ่าย: **{total_expense:,.2f} บาท**")
 st.write(f"- ยอดคงเหลือ: **{balance:,.2f} บาท**")
