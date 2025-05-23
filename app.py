@@ -5,8 +5,11 @@ st.set_page_config(page_title="ระบบบัญชีโรงเรีย�
                    page_icon="🏫")
 
 # --- ใช้ URL โดยตรงกับ st.image() ---
-school_img_url = "https://images.unsplash.com/photo-1596495577886-d920f1d9a8cc?auto=format&fit=crop&w=800&q=60"
-st.image(school_img_url, caption="โรงเรียนของเรา", use_container_width=True)
+from PIL import Image
+
+school_img = Image.open("school.jpg")
+st.image(school_img, caption="โรงเรียนของเรา", use_column_width=True)
+
 
 # --- CSS ปรับแต่ง UI ---
 st.markdown("""
