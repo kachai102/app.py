@@ -1,17 +1,14 @@
 import streamlit as st
 import pandas as pd
-
-st.set_page_config(page_title="ระบบบัญชีโรงเรียน", layout="centered",
-                   page_icon="🏫")
-
-# --- ใช้ URL โดยตรงกับ st.image() ---
 from PIL import Image
 
+st.set_page_config(page_title="ระบบบัญชีโรงเรียน", layout="centered", page_icon="🏫")
+
+# --- แสดงภาพโลโก้โรงเรียนแบบ local ---
 school_img = Image.open("school.jpg")
-st.image(school_img, caption="โรงเรียนของเรา", use_column_width=True)
+st.image(school_img, caption="โรงเรียนของเรา", use_container_width=True)
 
-
-# --- CSS ปรับแต่ง UI ---
+# --- CSS UI ---
 st.markdown("""
     <style>
     .main {
@@ -28,7 +25,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- ฟังก์ชันเก็บข้อมูล ---
 if 'income_data' not in st.session_state:
     st.session_state['income_data'] = pd.DataFrame(columns=["หมวดหมู่", "จำนวนเงิน"])
 if 'expense_data' not in st.session_state:
@@ -44,7 +40,6 @@ income_categories = [
 
 st.markdown('<div class="section-title">ระบบบัญชีโรงเรียน</div>', unsafe_allow_html=True)
 
-# --- ฟอร์มเพิ่มรายรับ ---
 with st.form("income_form"):
     st.markdown("💰 เพิ่มรายรับ")
     category = st.selectbox("หมวดหมู่รายรับ", income_categories)
@@ -60,7 +55,6 @@ with st.form("income_form"):
 
 st.markdown("---")
 
-# --- ฟอร์มเพิ่มรายจ่าย ---
 with st.form("expense_form"):
     st.markdown("💸 เพิ่มรายจ่าย")
     desc = st.text_area("รายละเอียดรายจ่าย")
@@ -76,7 +70,6 @@ with st.form("expense_form"):
 
 st.markdown("---")
 
-# --- สรุปบัญชี ---
 total_income = st.session_state.income_data["จำนวนเงิน"].sum()
 total_expense = st.session_state.expense_data["จำนวนเงิน"].sum()
 balance = total_income - total_expense
