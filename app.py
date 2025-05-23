@@ -6,7 +6,7 @@ st.set_page_config(page_title="ระบบบัญชีโรงเรีย�
 
 # --- แสดงภาพโลโก้โรงเรียนแบบ local ---
 school_img = Image.open("school.jpg")
-st.image(school_img, caption="โรงเรียนของเรา", use_container_width=True)
+st.image(school_img, caption="SMART SCHOOL PROJECT", use_container_width=True)
 
 # --- CSS UI ---
 st.markdown("""
